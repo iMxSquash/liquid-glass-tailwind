@@ -30,7 +30,7 @@ This repository packages Apple's Liquid Glass material as a [Claude Code skill](
 **Prerequisites:** Node.js 20+
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/iMxSquash/liquid-glass-tailwind.git
 cd liquid-glass-tailwind
 npm install
 npm run dev
@@ -65,27 +65,29 @@ The skill contains:
 - **`references/refraction.md`**: the complete, verified refraction implementation (the same code `src/refraction.js` is built from), with every trap documented alongside its symptom signature so it's recognizable on sight instead of re-debugged from scratch.
 - **`references/tailwind-v3.md`**: arbitrary-value equivalents for projects still on Tailwind v3.
 
-### Install as a user-level skill (macOS / Linux)
+### Install
 
-Symlinking instead of copying means the installed skill stays in sync with this repo automatically, a `git pull` here is all it takes to update it everywhere. Run from the repo root:
+**Manual (Claude Code), kept in sync with the repo**
 
 ```bash
+git clone https://github.com/iMxSquash/liquid-glass-tailwind.git ~/liquid-glass-tailwind
 mkdir -p ~/.claude/skills
-ln -s "$(pwd)/.claude/skills/liquid-glass-tailwind" ~/.claude/skills/liquid-glass-tailwind
+ln -s ~/liquid-glass-tailwind/.claude/skills/liquid-glass-tailwind ~/.claude/skills/liquid-glass-tailwind
 ```
 
-The skill is now available in every Claude Code session on your machine (start a new session to pick it up), and `git pull` in this repo is enough to update it, no extra step, no resync script, no risk of the installed copy drifting from the source like a plain `cp` would.
+`SKILL.md` lives at `.claude/skills/liquid-glass-tailwind/` inside the repo (this repo doubles as a Tailwind demo, not just a skill), so the symlink points one level in rather than at the repo root. From then on, `git pull` in `~/liquid-glass-tailwind` is all it takes to update the skill everywhere, no resync step, no risk of the installed copy drifting from the source.
 
 > [!WARNING]
-> Removing the repo also breaks the symlink. To uninstall without touching the repo, remove only the link: `rm ~/.claude/skills/liquid-glass-tailwind`.
+> Removing `~/liquid-glass-tailwind` also breaks the symlink. To uninstall without touching the repo, remove only the link: `rm ~/.claude/skills/liquid-glass-tailwind`.
 
-### One-time copy (no ongoing sync)
-
-If you'd rather have an independent, standalone snapshot (e.g. into another project's own `.claude/skills/`), copy the folder instead:
+**Manual (Claude Code), one-time copy, no ongoing sync**
 
 ```bash
-cp -R .claude/skills/liquid-glass-tailwind /path/to/other-project/.claude/skills/
+git clone https://github.com/iMxSquash/liquid-glass-tailwind.git /tmp/liquid-glass-tailwind
+cp -R /tmp/liquid-glass-tailwind/.claude/skills/liquid-glass-tailwind ~/.claude/skills/
 ```
+
+Start a new Claude Code session after either method to pick up the skill.
 
 ## Project structure
 
