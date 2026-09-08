@@ -1,0 +1,89 @@
+@import 'tailwindcss';
+
+/* Liquid Glass tokens, straight from the skill's SKILL.md recipe. */
+@theme {
+  --blur-glass-sm: 8px;
+  --blur-glass: 16px;
+  --blur-glass-lg: 24px;
+  --blur-glass-xl: 40px;
+
+  /* Every knob is consumed DIRECTLY by var() inside the utility, so each
+     one can be overridden at three levels: globally (redefine on :root),
+     per subtree (set it on any wrapper), or per element (inline style /
+     JS, e.g. the demo's tint slider). See the skill's "Runtime theming"
+     section for the rule that makes this work. */
+  --glass-tint: 255 255 255;
+  --glass-tint-alpha: 14%;
+  --glass-saturate: 180%;
+  --glass-brightness: 1.08;
+  --glass-blur-refract: 3px;   /* the CSS blur inside the refraction chain, driven by refraction.js */
+  --color-glass-rim: rgb(255 255 255 / 35%);
+  --color-glass-rim-top: rgb(255 255 255 / 65%);
+
+  --radius-glass: 28px;
+
+  --shadow-glass:
+    0 16px 48px rgb(0 0 0 / 30%), inset 0 1px 0 rgb(255 255 255 / 45%), inset 0 -1px 0 rgb(0 0 0 / 6%);
+}
+
+@custom-variant reduced-transparency (@media (prefers-reduced-transparency: reduce));
+
+/* The base glass surface: frost + tint + rim + sheen (layers 1-4 of the
+   skill's anatomy). Layer 5, refraction, is applied at runtime by
+   src/refraction.js on elements carrying [data-liquid-glass]. */
+@utility liquid-glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius-glass);
+
+  /* rgb(var(--glass-tint) / var(--glass-tint-alpha)) directly, never a
+     knob nested inside another custom property: a var() inside a custom
+     property is resolved where that property is DECLARED (:root), and the
+     already-resolved value is what gets inherited — overriding the inner
+     knob on a descendant (e.g. from the tint slider) would silently do
+     nothing. */
+  background: rgb(var(--glass-tint) / var(--glass-tint-alpha));
+  border: 1px solid var(--color-glass-rim);
+  border-top-color: var(--color-glass-rim-top);
+  background-clip: padding-box;
+  box-shadow: var(--shadow-glass);
+
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgb(255 255 255 / 50%) 0%, rgb(255 255 255 / 10%) 28%, transparent 58%);
+    mix-blend-mode: screen;
+  }
+
+  @variant reduced-transparency {
+    background: rgb(30 30 34 / 92%);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    &::after {
+      display: none;
+    }
+  }
+}
+
+/* Demo page decoration only, not part of the skill: a busy background
+   (grid + colorful blobs) so the refraction has real edges to bend. A flat
+   gradient shows almost nothing to distort. */
+@utility bg-demo {
+  background-image:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 15%) 0 2px, transparent 2px 40px),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 15%) 0 2px, transparent 2px 40px),
+    radial-gradient(circle at 15% 20%, #ff3b30 0%, transparent 30%),
+    radial-gradient(circle at 85% 15%, #ffcc00 0%, transparent 28%),
+    radial-gradient(circle at 20% 80%, #34c759 0%, transparent 30%),
+    radial-gradient(circle at 80% 85%, #af52de 0%, transparent 30%),
+    radial-gradient(circle at 50% 50%, #0a84ff 0%, transparent 35%),
+    linear-gradient(135deg, #1d1d1f 0%, #3a3a3c 100%);
+}
