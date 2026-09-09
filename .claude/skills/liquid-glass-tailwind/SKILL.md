@@ -22,13 +22,12 @@ These rules come from Apple's own material definition. Encode them in every impl
 
 ## Layer Anatomy
 
-Five conceptual layers on one element + one pseudo-element (back to front):
+Four conceptual layers on one element (back to front):
 
 1. **Frost** : `backdrop-filter: blur() saturate() brightness()`
 2. **Tint** : translucent `background`
-3. **Rim** : 1px border with brighter top edge + inset shadows
-4. **Sheen** : `::after` diagonal gradient, screen-blended
-5. **Refraction** (optional, Chromium only) : SVG `feDisplacementMap` via `backdrop-filter: url(#id)`, with optional chromatic aberration fringes. Non-trivial to get right; follow `references/refraction.md` literally, it contains the verified drop-in implementation
+3. **Rim** : 1px uniform border + inset shadows
+4. **Refraction** (optional, Chromium only) : SVG `feDisplacementMap` via `backdrop-filter: url(#id)`, with optional chromatic aberration fringes. Non-trivial to get right; follow `references/refraction.md` literally, it contains the verified drop-in implementation
 
 ## Consensus Values
 
@@ -38,7 +37,7 @@ The signature Apple look is `saturate(180%)` chained with blur. Key numbers:
 |---|---|---|
 | Tint (standard card) | `rgb(255 255 255 / 0.10)` to `0.18` | `rgb(0 0 0 / 0.40)` (black-based, more opaque) |
 | Tint scale | 0.06 (crystal) to 0.35 (frosted) | 0.16 to 0.70 |
-| Border | `1px rgb(255 255 255 / 0.20)`, top edge `0.40` | alpha `0.10`, top `0.15` |
+| Border | `1px rgb(255 255 255 / 0.20)` | alpha `0.10` |
 | Backdrop | `blur(8px) saturate(180%) brightness(1.1)` | same |
 | Radius | 16 to 28px, capsule-like (Apple favors large radii) | same |
 
@@ -76,7 +75,6 @@ Text contrast rule: never rely on the backdrop. For body text over arbitrary ima
   --glass-brightness: 1.1;
   --glass-blur-refract: 3px;   /* the CSS blur inside the refraction chain, see references/refraction.md */
   --color-glass-rim: rgb(255 255 255 / 0.20);
-  --color-glass-rim-top: rgb(255 255 255 / 0.40);
 
   --radius-glass: 20px;
   --radius-glass-lg: 28px;
@@ -104,32 +102,19 @@ Text contrast rule: never rely on the backdrop. For body text over arbitrary ima
   border-radius: var(--radius-glass);
   background: rgb(var(--glass-tint) / var(--glass-tint-alpha));
   border: 1px solid var(--color-glass-rim);
-  border-top-color: var(--color-glass-rim-top);  /* light refraction edge */
   background-clip: padding-box;
   box-shadow: var(--shadow-glass);
   -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
   backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
 
-  /* Sheen: diagonal specular sweep */
-  &::after {
-    content: "";
-    position: absolute; inset: 0; z-index: -1;
-    border-radius: inherit; pointer-events: none;
-    background: linear-gradient(135deg,
-      rgb(255 255 255 / 0.45), rgb(255 255 255 / 0.08) 28%, transparent 58%);
-    mix-blend-mode: screen;
-  }
-
   @variant dark {
     background: rgb(var(--glass-tint-dark) / var(--glass-tint-alpha-dark));
     border-color: rgb(255 255 255 / 0.10);
-    border-top-color: rgb(255 255 255 / 0.15);
   }
   @variant reduced-transparency {
     background: rgb(245 245 245 / 0.95);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    &::after { display: none; }
   }
 }
 
@@ -251,7 +236,6 @@ Include these blocks in the generated CSS by default:
 ```css
 @media (prefers-reduced-transparency: reduce) {
   .liquid-glass { background: rgb(245 245 245 / 0.98); backdrop-filter: none; -webkit-backdrop-filter: none; }
-  .liquid-glass::after { display: none; }
 }
 /* Safari/Firefox never match reduced-transparency; prefers-contrast is the safety net */
 @media (prefers-contrast: more) {
@@ -262,7 +246,7 @@ Include these blocks in the generated CSS by default:
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .liquid-glass, .liquid-glass::after { transition: none; animation: none; }
+  .liquid-glass { transition: none; animation: none; }
 }
 ```
 

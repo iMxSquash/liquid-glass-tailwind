@@ -19,7 +19,7 @@ This repository packages Apple's Liquid Glass material as a [Claude Code skill](
 
 ## Features
 
-- **Five-layer material**: frost, tint, rim, sheen, and optional SVG refraction, matching Apple's own highlight / shadow / illumination composition.
+- **Four-layer material**: frost, tint, rim, and optional SVG refraction, matching Apple's own highlight / shadow / illumination composition.
 - **Real refraction, not a filter preset**: a per-element displacement map generated from a rounded-rect signed distance field, with two lens modes (`symmetric`, `diagonal`) and optional chromatic aberration fringes.
 - **Runtime theming at three levels**: every knob (tint, saturation, blur, refraction strength...) is a plain CSS custom property, so you can reconfigure the whole app from `:root`, a single subtree, or one element, without touching the utility.
 - **Debugged for real**: every trap in `references/refraction.md` (filter geometry, displacement map symmetry, DOM timing, nested `var()` overrides) was hit, diagnosed, and verified fixed in a live browser, not guessed from documentation.
@@ -50,8 +50,8 @@ Open the printed local URL: a glass square sits over a busy, multi-color backgro
 
 `index.html` / `src/` is the reference implementation of the skill's recipe:
 
-- `src/style.css`: Tailwind v4 tokens (`@theme`) and the `liquid-glass` utility (`@utility`), covering frost, tint, rim, and sheen.
-- `src/refraction.js`: the fifth layer, refraction, as a standalone module. `attachLiquidGlassRefraction(el, options)` returns a controller with `update()` and `destroy()`.
+- `src/style.css`: Tailwind v4 tokens (`@theme`) and the `liquid-glass` utility (`@utility`), covering frost, tint, and rim.
+- `src/refraction.js`: the fourth layer, refraction, as a standalone module. `attachLiquidGlassRefraction(el, options)` returns a controller with `update()` and `destroy()`.
 - `src/main.js`: wires up the draggable square and the tuning panel.
 
 > [!TIP]
@@ -94,8 +94,8 @@ Start a new Claude Code session after either method to pick up the skill.
 ```
 .claude/skills/liquid-glass-tailwind/   the Claude Code skill (SKILL.md + references/)
 src/
-  style.css        Tailwind v4 tokens + the `liquid-glass` utility (layers 1-4)
-  refraction.js     layer 5: the verified SVG refraction module
+  style.css        Tailwind v4 tokens + the `liquid-glass` utility (layers 1-3)
+  refraction.js     layer 4: the verified SVG refraction module
   main.js           demo wiring: drag-and-drop square + live tuning controls
 index.html           Tailwind v4 demo page
 vite.config.js        Vite + @tailwindcss/vite plugin
