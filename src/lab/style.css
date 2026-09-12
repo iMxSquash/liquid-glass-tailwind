@@ -1,0 +1,188 @@
+@import 'tailwindcss';
+
+/*
+ * Liquid Glass Lab — every token, utility, and accessibility rule below is
+ * copied verbatim from the `apple-design` skill's
+ * references/web-liquid-glass.md (Tailwind v4 "Tokens and utilities" +
+ * "Accessibility" sections). This file intentionally does NOT reuse
+ * ../style.css (the project's own liquid-glass-tailwind skill demo) so this
+ * page tests the apple-design skill in isolation.
+ */
+
+@theme {
+  --blur-glass-sm: 8px;
+  --blur-glass: 16px;
+  --blur-glass-lg: 24px;
+  --blur-glass-xl: 40px;
+  --blur-glass-clear: 3px;
+
+  /* Every knob below is consumed DIRECTLY by var() inside the utility, so
+     each one is a live, functional parameter the lab's control panel can
+     override at the :root level (the "globally" tier of the skill's
+     Runtime theming rule). */
+  --glass-tint: 255 255 255;
+  --glass-tint-alpha: 12%;
+  --glass-tint-dark: 0 0 0;
+  --glass-tint-alpha-dark: 40%;
+  --glass-saturate: 180%;
+  --glass-brightness: 1.1;
+  --glass-blur-refract: 3px;
+  /* Flat, final value on purpose (never `rgb(255 255 255 / var(--x))`):
+     the skill's Runtime theming rule warns that a var() nested inside a
+     custom property resolves where the property is DECLARED, so a
+     per-element/per-subtree override of an inner alpha token would
+     silently do nothing. The lab's "Rim opacity" control instead sets
+     this whole property directly via JS on every change. */
+  --color-glass-rim: rgb(255 255 255 / 20%);
+
+  --radius-glass: 20px;
+  --radius-glass-lg: 28px;
+
+  --shadow-glass:
+    0 8px 24px rgb(0 0 0 / 0.12),
+    0 2px 4px rgb(0 0 0 / 0.08),
+    inset 0 1px 0 rgb(255 255 255 / 0.40),
+    inset 0 -1px 0 rgb(0 0 0 / 0.05);
+  --shadow-glass-lg:
+    0 16px 48px rgb(0 0 0 / 0.16),
+    0 4px 8px rgb(0 0 0 / 0.08),
+    inset 0 1px 1px rgb(255 255 255 / 0.55),
+    inset 0 -1px 1px rgb(255 255 255 / 0.30);
+  --shadow-glass-rim: inset 0 0 20px -5px rgb(255 255 255 / 0.70);
+}
+
+/* Lets the "Dark mode" toggle in the lab force the dark: variant with a
+   class, instead of only following the OS prefers-color-scheme setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant reduced-transparency (@media (prefers-reduced-transparency: reduce));
+
+@utility liquid-glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--radius-glass);
+  background: rgb(var(--glass-tint) / var(--glass-tint-alpha));
+  border: 1px solid var(--color-glass-rim);
+  background-clip: padding-box;
+  box-shadow: var(--shadow-glass);
+  -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  backdrop-filter: blur(var(--blur-glass)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+
+  @variant dark {
+    background: rgb(var(--glass-tint-dark) / var(--glass-tint-alpha-dark));
+    border-color: rgb(255 255 255 / 0.10);
+  }
+  @variant reduced-transparency {
+    background: rgb(245 245 245 / 0.95);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Clear variant: only over bold/bright media */
+@utility liquid-glass-clear {
+  background: rgb(255 255 255 / 0.05);
+  -webkit-backdrop-filter: blur(var(--blur-glass-clear)) saturate(150%);
+  backdrop-filter: blur(var(--blur-glass-clear)) saturate(150%);
+}
+
+/* Top hairline highlight (cheapest specular, use on navbars) */
+@utility glass-hairline {
+  &::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.7), transparent);
+  }
+}
+
+/* Scroll edge effect utility, from web-liquid-glass.md. NOTE (verified live
+   in this lab): applying this as a `mask-image` on the scrolling container
+   itself blocks `backdrop-filter` sampling for any descendant that needs to
+   read content outside that container (e.g. a refracting glass card) — the
+   mask creates a new "backdrop root". Kept here for reference/small
+   decorative uses; the lab page itself uses `.glass-scroll-edge` below
+   (a separate overlay strip, not a mask on the scroll container) instead. */
+@utility scroll-edge-fade {
+  mask-image: linear-gradient(to bottom, transparent, black 24px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 24px);
+}
+
+/* Scroll edge effect, overlay-strip variant: a small fixed blurred strip
+   positioned at the scroll boundary, independent of the scroll container's
+   own subtree, so it never creates a backdrop-root over glass content. */
+@utility glass-scroll-edge {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  mask-image: linear-gradient(to bottom, black, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+/* Dimming layer for the Clear variant over bright media (Apple's exact
+   35%-opacity rule, see foundations-visual.md -> Materials). Applied by the
+   lab's "Dimming layer (35%)" checkbox, never hard-on. */
+@utility liquid-glass-dim {
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.35);
+    pointer-events: none;
+  }
+}
+
+/* Accessibility (non-optional, from web-liquid-glass.md) */
+@media (prefers-reduced-transparency: reduce) {
+  .liquid-glass {
+    background: rgb(245 245 245 / 0.98);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .liquid-glass {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .liquid-glass {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Decorative background only (not part of the skill): a flat/soft gradient
+   gives blur and refraction almost nothing to bend — real edges (a grid +
+   saturated blobs + bold text) are what make both effects legible, same
+   principle as the project's own ../style.css `bg-demo`. Rewritten here
+   (not imported) to keep this lab self-contained. */
+.lab-bg {
+  background-image:
+    repeating-linear-gradient(0deg, rgb(0 0 0 / 15%) 0 2px, transparent 2px 40px),
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 15%) 0 2px, transparent 2px 40px),
+    radial-gradient(circle at 15% 20%, #ff3b30 0%, transparent 30%),
+    radial-gradient(circle at 85% 15%, #ffcc00 0%, transparent 28%),
+    radial-gradient(circle at 20% 80%, #34c759 0%, transparent 30%),
+    radial-gradient(circle at 80% 85%, #af52de 0%, transparent 30%),
+    radial-gradient(circle at 50% 50%, #0a84ff 0%, transparent 35%),
+    linear-gradient(135deg, #1d1d1f 0%, #3a3a3c 100%);
+}
+
+.lab-bg-text {
+  position: absolute;
+  top: 14%;
+  left: 5%;
+  font-size: clamp(4rem, 13vw, 10rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: rgb(255 255 255 / 0.9);
+  text-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+  user-select: none;
+}

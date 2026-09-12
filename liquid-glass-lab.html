@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liquid Glass Lab — apple-design skill</title>
+    <link rel="stylesheet" href="/src/lab/style.css" />
+  </head>
+  <body class="h-dvh overflow-hidden font-sans text-white">
+    <!-- Hidden SVG filter defs, filled at runtime by refraction.js -->
+    <svg id="lab-defs" width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false"></svg>
+
+    <div class="lab-bg fixed inset-0 -z-10" aria-hidden="true">
+      <span class="lab-bg-text">GLASS</span>
+    </div>
+
+    <!-- Navbar: liquid-glass, hairline highlight, fixed. This is the "Navbar/
+         toolbar exception" from the skill's "When to attach refraction":
+         a full-width top navbar is background chrome, not a control in its
+         own right, so it stays blur+saturate only -> no data-liquid-glass,
+         same treatment as the Card. An app-style/floating toolbar or tab bar
+         (compact, closer to a dock than a page header) would carry
+         data-liquid-glass instead. -->
+    <nav class="liquid-glass glass-hairline fixed inset-x-0 top-0 z-30 flex h-16 items-center justify-between rounded-none border-x-0 border-t-0 px-6">
+      <span class="font-semibold tracking-tight">Liquid Glass Lab</span>
+      <span class="text-xs opacity-60">apple-design skill — références/web-liquid-glass.md</span>
+    </nav>
+
+    <!-- Scroll Edge Effect: a small overlay strip below the navbar, NOT a
+         mask-image on <main> itself. Verified live: mask-image on an
+         ancestor of a backdrop-filter element (like the refracting Card
+         below) creates a new "backdrop root" that blocks that descendant
+         from sampling anything outside the masked subtree — the Card's
+         refraction went completely flat when scroll-edge-fade was a class
+         on <main>, and came back the instant it was removed. Documented in
+         web-liquid-glass.md; this overlay-strip approach sidesteps it. -->
+    <div class="glass-scroll-edge pointer-events-none fixed inset-x-0 top-16 z-20 h-8 lg:right-96"></div>
+
+    <!-- Scrollable content -->
+    <main id="scrollArea" class="h-dvh overflow-y-auto px-6 pt-24 pb-24 lg:pr-96">
+      <section class="mx-auto flex max-w-2xl flex-col gap-10">
+        <!-- Card: static content backdrop, no interaction -> intentionally NO
+             data-liquid-glass. This is the skill's own example of the one
+             surface that skips refraction (see Component Patterns). -->
+        <div
+          id="heroCard"
+          data-glass
+          class="liquid-glass relative flex min-h-[260px] flex-col justify-end gap-2 p-8 shadow-(--shadow-glass)"
+        >
+          <h1 class="text-3xl font-semibold" style="text-shadow: 0 1px 2px rgb(0 0 0 / 0.35)">Card</h1>
+          <p class="max-w-md text-sm opacity-80" style="text-shadow: 0 1px 2px rgb(0 0 0 / 0.35)">
+            Layer anatomy: frost (backdrop-filter), tint (background), rim (border + inset shadow). No refraction
+            here on purpose: this Card isn't actionable, unlike everything else on this page.
+          </p>
+        </div>
+
+        <!-- Button: radius intentionally NOT overridden with rounded-full, so
+             it tracks --radius-glass like every other component here.
+             Actionable -> data-liquid-glass, refraction on by default. -->
+        <div class="flex flex-wrap items-center gap-4">
+          <button
+            data-glass
+            data-liquid-glass
+            class="liquid-glass px-5 py-2.5 text-sm font-medium shadow-(--shadow-glass-rim) transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-px hover:bg-white/20 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-[#0a84ff] focus-visible:outline-offset-2"
+          >
+            Bouton liquid glass
+          </button>
+          <button
+            id="openModalBtn"
+            data-glass
+            data-liquid-glass
+            class="liquid-glass px-5 py-2.5 text-sm font-medium shadow-(--shadow-glass-rim) transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-px hover:bg-white/20 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-[#0a84ff] focus-visible:outline-offset-2"
+          >
+            Ouvrir la sheet
+          </button>
+        </div>
+
+        <!-- Segmented control: wrapper radius also tracks --radius-glass (no
+             rounded-xl override); the inner segment radii are computed with
+             the skill's concentric-corner formula (child = parent - padding,
+             wrapper padding is p-1 = 4px) so they stay concentric with the
+             wrapper at any --radius-glass value instead of a fixed rounded-lg.
+             Actionable -> data-liquid-glass, refraction on by default. -->
+        <div data-glass data-liquid-glass class="liquid-glass inline-flex w-fit p-1">
+          <button class="rounded-[max(2px,calc(var(--radius-glass)-4px))] bg-white/20 px-4 py-2 text-sm font-medium shadow-sm">Regular</button>
+          <button class="rounded-[max(2px,calc(var(--radius-glass)-4px))] px-4 py-2 text-sm font-medium opacity-60 transition-opacity hover:opacity-90">
+            Clear
+          </button>
+          <button class="rounded-[max(2px,calc(var(--radius-glass)-4px))] px-4 py-2 text-sm font-medium opacity-60 transition-opacity hover:opacity-90">
+            Refraction
+          </button>
+        </div>
+
+        <!-- Filler content so the scroll-edge-fade effect has something to scroll -->
+        <div class="flex flex-col gap-4 pb-32 text-sm leading-relaxed opacity-70">
+          <p>
+            Fais défiler cette colonne : le haut du contenu s'estompe sous la navbar (Scroll Edge Effect). Implémenté
+            ici comme une fine bande floutée séparée plutôt qu'un <code>mask-image</code> sur ce conteneur : un
+            <code>mask-image</code> sur un ancêtre du Card casserait sa réfraction (voir le commentaire dans le HTML).
+          </p>
+          <p>Tous les réglages du panneau agissent globalement (niveau `:root`, le premier des trois niveaux de "Runtime theming" du skill) sur chaque élément `data-glass` de cette page.</p>
+          <div class="h-40 rounded-2xl bg-white/5"></div>
+          <div class="h-40 rounded-2xl bg-white/5"></div>
+          <div class="h-40 rounded-2xl bg-white/5"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal / sheet: heavier frost, inset from viewport edge (migration
+         checklist). Prominent + infrequent (opens occasionally, not repeated
+         N times on screen) -> the one place on this page that spends a
+         chromatic-aberration slot (data-liquid-glass-aberration), per the
+         skill's "reserve aberration for ~2 prominent elements" rule. Every
+         other actionable element here stays at aberration 0. -->
+    <div id="modalOverlay" class="pointer-events-none fixed inset-0 z-40 flex items-end justify-center opacity-0 transition-opacity duration-300" aria-hidden="true">
+      <div class="absolute inset-0 bg-black/40" data-close-modal></div>
+      <div
+        data-glass
+        data-liquid-glass
+        data-liquid-glass-aberration="12"
+        class="liquid-glass relative m-4 w-full max-w-md translate-y-4 p-6 shadow-(--shadow-glass-lg) transition-transform duration-300"
+        id="modalSheet"
+      >
+        <h2 class="mb-2 text-lg font-semibold">Sheet</h2>
+        <p class="mb-4 text-sm opacity-80">
+          Insetée depuis le bord de l'écran (checklist de migration) ; en plein écran elle deviendrait plus opaque.
+          Son flou/saturation/rayon suivent les mêmes réglages que les autres composants (pas de valeur figée). C'est
+          le seul élément de cette page avec de l'aberration chromatique (proéminent, peu fréquent).
+        </p>
+        <button data-close-modal data-glass data-liquid-glass class="liquid-glass px-4 py-2 text-sm font-medium">Fermer</button>
+      </div>
+    </div>
+
+    <!-- Control panel: deliberately NOT a liquid-glass surface itself (must stay
+         readable no matter what the sliders below do to the material). -->
+    <aside
+      class="fixed inset-x-0 bottom-0 z-50 max-h-[70dvh] overflow-y-auto rounded-t-2xl bg-neutral-900/95 p-5 text-xs backdrop-blur-md lg:inset-y-0 lg:right-0 lg:left-auto lg:top-16 lg:max-h-none lg:w-96 lg:rounded-none lg:border-l lg:border-white/10"
+    >
+      <h2 class="mb-4 text-sm font-semibold">Paramètres liquid glass</h2>
+      <p class="mb-5 leading-relaxed opacity-60">
+        Chaque contrôle ci-dessous pilote une variable CSS définie par le skill (<code>--glass-*</code>,
+        <code>--blur-glass</code>, <code>--radius-glass</code>) ou une option de la fonction de réfraction. Aucun
+        contrôle n'a été ajouté pour un paramètre que le skill ne définit pas.
+      </p>
+
+      <fieldset class="mb-5 border-t border-white/10 pt-4">
+        <legend class="mb-3 px-0 text-[11px] font-semibold tracking-wide text-white/50 uppercase">Variante</legend>
+        <label class="mb-3 block">
+          <span class="mb-1 block opacity-75">Variant (Regular / Clear)</span>
+          <select id="variantSelect" class="w-full rounded bg-neutral-800 px-2 py-1.5">
+            <option value="regular" selected>Regular</option>
+            <option value="clear">Clear</option>
+          </select>
+        </label>
+        <label class="flex items-center gap-2">
+          <input id="dimToggle" type="checkbox" class="h-4 w-4" />
+          <span class="opacity-80">Dimming layer (35%) — Clear sur fond clair</span>
+        </label>
+      </fieldset>
+
+      <fieldset class="mb-5 border-t border-white/10 pt-4">
+        <legend class="mb-3 px-0 text-[11px] font-semibold tracking-wide text-white/50 uppercase">Matériau</legend>
+
+        <label class="mb-3 block">
+          <div class="mb-1 flex justify-between opacity-75"><span>Flou — <code>--blur-glass</code></span><span id="blurVal">16px</span></div>
+          <input id="blurRange" type="range" min="0" max="40" value="16" step="1" class="w-full" />
+        </label>
+
+        <label class="mb-3 block">
+          <div class="mb-1 flex justify-between opacity-75"><span>Saturation — <code>--glass-saturate</code></span><span id="saturateVal">180%</span></div>
+          <input id="saturateRange" type="range" min="100" max="250" value="180" step="5" class="w-full" />
+        </label>
+
+        <label class="mb-3 block">
+          <div class="mb-1 flex justify-between opacity-75"><span>Luminosité — <code>--glass-brightness</code></span><span id="brightnessVal">1.10</span></div>
+          <input id="brightnessRange" type="range" min="0.8" max="1.4" value="1.1" step="0.02" class="w-full" />
+        </label>
+
+        <label class="mb-3 block">
+          <div class="mb-1 flex justify-between opacity-75"><span>Rayon — <code>--radius-glass</code></span><span id="radiusVal">20px</span></div>
+          <input id="radiusRange" type="range" min="0" max="40" value="20" step="1" class="w-full" />
+        </label>
+
+        <label class="mb-3 block">
+          <div class="mb-1 flex justify-between opacity-75"><span>Opacité du liseré — <code>--color-glass-rim</code></span><span id="rimVal">20%</span></div>
+          <input id="rimRange" type="range" min="0" max="100" value="20" step="2" class="w-full" />
+        </label>
+      </fieldset>
+
+      <fieldset class="mb-5 border-t border-white/10 pt-4">
+        <legend class="mb-3 px-0 text-[11px] font-semibold tracking-wide text-white/50 uppercase">Teinte — light mode</legend>
+        <div class="flex items-center gap-3">
+          <label class="flex items-center gap-2">
+            <span class="opacity-75">Couleur</span>
+            <input id="tintLightColor" type="color" value="#ffffff" class="h-7 w-10 rounded bg-transparent" />
+          </label>
+          <label class="flex flex-1 items-center gap-2">
+            <span class="opacity-75">Alpha</span>
+            <input id="tintLightAlpha" type="range" min="0" max="60" value="12" step="1" class="w-full" />
+            <span id="tintLightAlphaVal" class="w-9 text-right">12%</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="mb-5 border-t border-white/10 pt-4">
+        <legend class="mb-3 flex w-full items-center justify-between px-0 text-[11px] font-semibold tracking-wide text-white/50 uppercase">
+          <span>Teinte — dark mode</span>
+          <label class="flex items-center gap-2 normal-case">
+            <input id="darkToggle" type="checkbox" class="h-4 w-4" />
+            <span class="text-[11px] font-normal text-white/70">Dark mode</span>
+          </label>
+        </legend>
+        <div id="darkTintControls" class="flex items-center gap-3 opacity-40">
+          <label class="flex items-center gap-2">
+            <span class="opacity-75">Couleur</span>
+            <input id="tintDarkColor" type="color" value="#000000" disabled class="h-7 w-10 rounded bg-transparent" />
+          </label>
+          <label class="flex flex-1 items-center gap-2">
+            <span class="opacity-75">Alpha</span>
+            <input id="tintDarkAlpha" type="range" min="0" max="90" value="40" step="1" disabled class="w-full" />
+            <span id="tintDarkAlphaVal" class="w-9 text-right">40%</span>
+          </label>
+        </div>
+        <p class="mt-2 opacity-50">Actifs seulement avec Dark mode coché (le variant <code>dark:</code> du skill).</p>
+      </fieldset>
+
+      <fieldset class="border-t border-white/10 pt-4">
+        <legend class="mb-3 px-0 text-[11px] font-semibold tracking-wide text-white/50 uppercase">Réfraction (Chromium)</legend>
+        <p class="mb-3 leading-relaxed opacity-60">
+          Activée par défaut sur chaque contrôle discret et actionnable (boutons, segmented control, sheet) — pas
+          seulement une carte hero — comme Apple le fait nativement sur tout contrôle en Liquid Glass. Deux
+          exceptions : le Card (non actionnable) et la navbar en haut, qui reste en blur+saturate seul — une barre
+          pleine largeur est un fond, pas un contrôle en soi (voir "Navbar/toolbar exception" dans le skill).
+        </p>
+        <p id="refractionUnsupported" hidden class="mb-3 text-amber-300">
+          `backdrop-filter: url()` non supporté par ce navigateur — repli blur+saturate uniquement, les contrôles
+          ci-dessous n'ont aucun effet.
+        </p>
+        <div id="refractionControls">
+          <label class="mb-3 block">
+            <div class="mb-1 flex justify-between opacity-75"><span>Distorsion (scale) — tous les éléments</span><span id="scaleVal">48</span></div>
+            <input id="scaleRange" type="range" min="-100" max="100" value="48" step="2" class="w-full" />
+          </label>
+          <label class="mb-3 block">
+            <div class="mb-1 flex justify-between opacity-75"><span>Aberration chromatique — Sheet uniquement (élément proéminent)</span><span id="caVal">12</span></div>
+            <input id="caRange" type="range" min="0" max="24" value="12" step="1" class="w-full" />
+          </label>
+          <label class="mb-3 block">
+            <div class="mb-1 flex justify-between opacity-75"><span>Flou de la chaîne — <code>--glass-blur-refract</code>, tous les éléments</span><span id="refractBlurVal">3px</span></div>
+            <input id="refractBlurRange" type="range" min="0" max="6" value="3" step="0.5" class="w-full" />
+          </label>
+          <label class="block">
+            <span class="mb-1 block opacity-75">Mode de lentille — tous les éléments</span>
+            <select id="lensMode" class="w-full rounded bg-neutral-800 px-2 py-1.5">
+              <option value="diagonal" selected>diagonal</option>
+              <option value="symmetric">symmetric</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <button id="resetBtn" class="mt-5 w-full rounded-lg border border-white/15 py-2 text-center text-xs opacity-70 hover:opacity-100">
+        Réinitialiser
+      </button>
+    </aside>
+
+    <script type="module" src="/src/lab/main.js"></script>
+  </body>
+</html>
