@@ -18,6 +18,7 @@ A per-element SVG filter whose displacement map is drawn pixel by pixel on a can
 6. **Run the wiring script after the DOM is parsed** (DOMContentLoaded or end of body): a script at the top of `<body>` sees none of the target elements.
 7. **Do an immediate rebuild for already-laid-out elements.** ResizeObserver callbacks ride the rendering steps and can be throttled (occluded window); keep the observer for resizes and late layout (hidden elements appearing).
 8. **Skip the whole enhancement when `prefers-reduced-transparency: reduce` or `prefers-contrast: more` matches**: the inline style would override the CSS accessibility fallbacks.
+9. **No `mask-image` on any ancestor of the refracting element.** A `mask-image` (including the Scroll Edge Effect's mask-based variant, see SKILL.md) creates a new backdrop-root on the element that carries it, which silently caps every descendant's `backdrop-filter` to sampling only within that masked subtree. Verified symptom: everything about the filter looks correct (computed `backdrop-filter` shows the right `url(...)` chain, the generated displacement map samples correctly non-neutral at the edges) yet the element renders completely flat, undistorted, no console error — the fix is removing the mask from the ancestor (or moving the fade to its own separate overlay element) rather than debugging the filter math.
 
 ## feDisplacementMap mechanics
 
@@ -191,9 +192,16 @@ CSS keeps only the cross-browser fallback on the glass elements (see SKILL.md); 
     if (w0 > 0 && h0 > 0) rebuild(w0, h0);
   }
 
+  // Refraction is the default for every actionable [data-liquid-glass]
+  // element (see SKILL.md's "When to attach refraction") - aberration
+  // defaults to 0 (single-pass, cheap) unless an element opts into the
+  // more expensive chromatic-aberration look via
+  // data-liquid-glass-aberration="12" (reserve that for ~2 prominent
+  // elements per viewport, per the Performance Budget).
   function init() {
     document.querySelectorAll('[data-liquid-glass]').forEach(function (el) {
-      attachRefraction(el);
+      var aberration = Number(el.getAttribute('data-liquid-glass-aberration')) || 0;
+      attachRefraction(el, { aberration: aberration });
     });
   }
   if (document.readyState === 'loading') {
@@ -238,6 +246,6 @@ Do NOT detect refraction support with `@supports (backdrop-filter: url(#f))`: it
 
 ## Performance
 
-- Budget: at most 2 refracting elements per viewport; chromatic aberration triples the displacement cost, so reserve it for hero surfaces.
+- Refraction itself (single-pass, `aberration: 0`) is meant to run on every actionable `[data-liquid-glass]` element — see SKILL.md's "When to attach refraction" and "Performance Budget". Chromatic aberration specifically is what's expensive (triples the displacement cost): budget at most ~2 elements per viewport with `aberration > 0`, reserved for prominent/infrequent surfaces (a modal, a dock), not every button.
 - Never animate blur radius or element size; animate `transform`, `opacity`, or the `scale` attributes.
-- The map rebuild is the expensive step (canvas + toDataURL): it only happens on resize, never per frame.
+- The map rebuild is the expensive step (canvas + toDataURL): it only happens on resize, never per frame. With refraction on many small controls, the cost is one canvas per element on resize, not proportional to how many share the same visual style.
